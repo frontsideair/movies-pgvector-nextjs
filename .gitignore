@@ -1,0 +1,19 @@
+# Devenv
+.devenv*
+devenv.local.nix
+
+# direnv
+.direnv
+
+# pre-commit
+.pre-commit-config.yaml
+
+# nodejs
+node_modules
+.next
+.env
+tsconfig.tsbuildinfo
+
+# other
+.DS_Store
+downloads/*

@@ -1,4 +1,4 @@
-import { pool, sql, genEmbedding } from "../lib/model.ts";
+import { connect, sql, genEmbedding } from "../lib/model.ts";
 import { batch } from "../lib/batch.ts";
 import fs from "fs/promises";
 import { parse } from "csv-parse";
@@ -21,6 +21,8 @@ function parseJsonArray(json: string) {
     return [];
   }
 }
+
+const pool = await connect();
 
 async function parseRecord(record: any) {
   try {

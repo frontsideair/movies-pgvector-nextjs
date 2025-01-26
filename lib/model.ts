@@ -21,7 +21,9 @@ export async function genEmbedding(texts: string[]) {
   )}::vector`;
 }
 
-export const pool = await createPool("postgres://127.0.0.1/movies");
+export async function connect() {
+  return await createPool("postgres://127.0.0.1/movies");
+}
 
 export const sql = createSqlTag({
   typeAliases: {
@@ -57,6 +59,7 @@ export async function getMovies(
   if (!query) {
     return [];
   }
+  const pool = await connect();
   const orderBy = await getOrderByFragment(query, distanceFunction);
   const movies = await pool.query(
     sql.type(Movie)`

@@ -1,4 +1,5 @@
 import { distanceFunctions, type Query } from "@/lib/shared";
+import Form from "next/form";
 
 export function SearchForm({ q, limit, distance }: Query) {
   return (
@@ -13,14 +14,14 @@ export function SearchForm({ q, limit, distance }: Query) {
           width: 100%;
         }
       `}</style>
-      <form>
+      <Form action="/">
         <label>
           <div>Search query</div>
-          <input type="search" name="q" defaultValue={q} />
+          <input type="search" name="q" defaultValue={q} key={q} />
         </label>
         <label>
           <div>Number of results</div>
-          <select name="limit" defaultValue={limit}>
+          <select name="limit" defaultValue={limit} key={limit}>
             <option value="10">10</option>
             <option value="20">20</option>
             <option value="50">50</option>
@@ -28,7 +29,7 @@ export function SearchForm({ q, limit, distance }: Query) {
         </label>
         <label>
           <div>Distance function</div>
-          <select name="distance" defaultValue={distance}>
+          <select name="distance" defaultValue={distance} key={distance}>
             {distanceFunctions.map((df) => (
               <option key={df.name} value={df.name}>
                 {df.description}
@@ -37,7 +38,7 @@ export function SearchForm({ q, limit, distance }: Query) {
           </select>
         </label>
         <button type="submit">Search</button>
-      </form>
+      </Form>
     </search>
   );
 }

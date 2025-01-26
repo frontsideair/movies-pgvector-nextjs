@@ -3,6 +3,10 @@
 {
   dotenv.enable = true;
 
+  env = {
+    POSTGRES_URL = "postgres://127.0.0.1/movies";
+  };
+
   packages = [
     pkgs.kaggle
     pkgs.unzip

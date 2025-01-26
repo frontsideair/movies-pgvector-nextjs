@@ -22,7 +22,8 @@ export async function genEmbedding(texts: string[]) {
 }
 
 export async function connect() {
-  return await createPool("postgres://127.0.0.1/movies");
+  const postgresUrl = z.string().parse(process.env.POSTGRES_URL);
+  return await createPool(postgresUrl);
 }
 
 export const sql = createSqlTag({

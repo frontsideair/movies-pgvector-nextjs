@@ -2,6 +2,7 @@ import { createPool, createSqlTag } from "slonik";
 import { z } from "zod";
 
 import { pipeline } from "@xenova/transformers";
+import { Movie, type DistanceFunctionName } from "@/lib/shared";
 
 const generateEmbedding = await pipeline(
   "feature-extraction",
@@ -20,21 +21,6 @@ export async function genEmbedding(texts: string[]) {
   )}::vector`;
 }
 
-export const MovieInsert = z.object({
-  title: z.string(),
-  year: z.coerce.number(),
-  href: z.string(),
-  extract: z.string(),
-});
-
-const Movie = z.object({
-  id: z.number(),
-  title: z.string(),
-  year: z.number().optional(),
-  href: z.string().optional(),
-  extract: z.string().optional(),
-});
-
 export const pool = await createPool("postgres://127.0.0.1/movies");
 
 export const sql = createSqlTag({
@@ -46,14 +32,38 @@ export const sql = createSqlTag({
   },
 });
 
-export async function getMovies(query: string) {
+async function getOrderByFragment(
+  query: string,
+  distanceFunction: DistanceFunctionName
+) {
   const embedding = await genEmbedding([query]);
+  switch (distanceFunction) {
+    case "<->":
+      return sql.fragment`ORDER BY embedding <-> ${embedding}`;
+    case "<#>":
+      return sql.fragment`ORDER BY embedding <#> ${embedding}`;
+    case "<=>":
+      return sql.fragment`ORDER BY embedding <=> ${embedding}`;
+    case "<+>":
+      return sql.fragment`ORDER BY embedding <+> ${embedding}`;
+  }
+}
+
+export async function getMovies(
+  query: string,
+  limit: number,
+  distanceFunction: DistanceFunctionName
+) {
+  if (!query) {
+    return [];
+  }
+  const orderBy = await getOrderByFragment(query, distanceFunction);
   const movies = await pool.query(
     sql.type(Movie)`
-    SELECT id, title, year, href, extract
+    SELECT id, imdb_id, title, tagline, overview, release_date, vote_average
     FROM movies
-    ORDER BY embedding <-> ${embedding}
-    LIMIT 10;`
+    ${orderBy}
+    LIMIT ${limit};`
   );
 
   return movies.rows;

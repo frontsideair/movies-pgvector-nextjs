@@ -1,4 +1,5 @@
 import { pool, sql, genEmbedding } from "../lib/model.ts";
+import { batch } from "../lib/batch.ts";
 import fs from "fs/promises";
 import { parse } from "csv-parse";
 
@@ -11,17 +12,73 @@ const parser = parse(csvFile, {
   skipRecordsWithError: true,
 });
 
-for await (const record of parser) {
-  const year = record.release_date.slice(0, 4);
-  const movie = {
-    title: record.title,
-    year: Number(year),
-    href: record.homepage,
-    extract: record.overview,
-  };
-  const embedding = await genEmbedding([movie.extract]);
-  await pool.query(sql.typeAlias("void")`
-    INSERT INTO movies (title, year, href, extract, embedding)
-    VALUES (${movie.title}, ${movie.year}, ${movie.href}, ${movie.extract}, ${embedding});
-  `);
+const batchedParser = batch(parser, 4);
+
+function parseJsonArray(json: string) {
+  try {
+    return JSON.parse(json);
+  } catch {
+    return [];
+  }
+}
+
+async function parseRecord(record: any) {
+  try {
+    const title = record.title;
+    const tagline = record.tagline;
+    const overview = record.overview;
+    const releaseDate = record.release_date || null;
+    const genres = parseJsonArray(record.genres).map(
+      (genre: any) => genre.name
+    );
+    const imdbId = record.imdb_id;
+    const voteAverage = Number(record.vote_average);
+    const productionCompanies = parseJsonArray(record.production_companies).map(
+      (company: any) => company.name
+    );
+    const embedding = await genEmbedding([
+      `
+      Title: ${record.title}
+      Tagline: ${tagline}
+      Overview: ${record.overview}
+      Release date: ${releaseDate}
+      Genres: ${genres.join(", ")}
+      Production companies: ${productionCompanies.join(", ")}
+    `,
+    ]);
+
+    return {
+      title,
+      tagline,
+      overview,
+      releaseDate,
+      genres,
+      imdbId,
+      voteAverage,
+      productionCompanies,
+      embedding,
+    };
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+}
+
+for await (const records of batchedParser) {
+  try {
+    const parsedRecords = (await Promise.all(records.map(parseRecord))).filter(
+      (record) => record !== null
+    );
+
+    await Promise.all(
+      parsedRecords.map((record) =>
+        pool.query(sql.typeAlias("void")`
+          INSERT INTO movies (imdb_id, title, tagline, overview, release_date, vote_average, embedding)
+          VALUES (${record.imdbId}, ${record.title}, ${record.tagline}, ${record.overview}, ${record.releaseDate}, ${record.voteAverage}, ${record.embedding})
+        `)
+      )
+    );
+  } catch (e) {
+    console.error(e);
+  }
 }

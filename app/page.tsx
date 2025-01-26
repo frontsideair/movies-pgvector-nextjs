@@ -1,36 +1,64 @@
 import { getMovies } from "@/lib/model";
-import { z } from "zod";
+import { Query } from "@/lib/shared";
+import { SearchForm } from "@/components/SearchForm";
+import { SearchResults } from "@/components/SearchResults";
 
-const Query = z.string().optional().default("");
-
-export default async function Page({
-  searchParams,
-}: {
+type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
-  const query = Query.parse((await searchParams).q);
-  const movies = await getMovies(query);
+};
+
+export default async function Page({ searchParams }: Props) {
+  const { q, limit, distance } = Query.parse(await searchParams);
+  const query = q.trim();
+  const movies = await getMovies(query, Number(limit), distance);
 
   return (
-    <main>
-      <h1>Movies</h1>
-      <search>
-        <form>
-          <label>
-            <div>Find a Movie</div>
-            <input type="search" name="q" defaultValue={query} />
-          </label>
-          <button type="submit">Search</button>
-        </form>
-      </search>
-
-      <ul>
-        {movies.map((movie) => (
-          <li key={movie.id}>
-            <a href={movie.href}>{movie.title}</a>
-          </li>
-        ))}
-      </ul>
-    </main>
+    <>
+      <style>{`
+        body {
+          max-width: 80ch;
+          margin: 0 auto;
+          padding: 1rem;
+        }
+        footer nav ul {
+          padding: 0;
+          list-style: none;
+          display: flex;
+          justify-content: center;
+          gap: 0.5rem;
+        }
+      `}</style>
+      <header>
+        <h1>
+          <a href="/">Semantic Movies</a>
+        </h1>
+        <SearchForm q={query} limit={limit} distance={distance} />
+      </header>
+      <main>
+        <SearchResults movies={movies} />
+      </main>
+      <footer>
+        <nav>
+          <ul>
+            <li>
+              <a
+                href="https://github.com/frontsideair/movies-pgvector-nextjs"
+                target="_blank"
+              >
+                GitHub
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://kaggle.com/datasets/rounakbanik/the-movies-dataset"
+                target="_blank"
+              >
+                Kaggle
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </footer>
+    </>
   );
 }

@@ -1,7 +1,6 @@
 import { distanceFunctions, type Query } from "@/lib/shared";
 
 export function SearchForm({ q, limit, distance }: Query) {
-  console.log(q, limit, distance);
   return (
     <search>
       <style>{`

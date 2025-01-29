@@ -7,7 +7,7 @@ type Props = {
 export function SearchResult({ movie }: Props) {
   return (
     <li>
-      <style>{`
+      <style href="search-result" precedence="default">{`
         main dl {
           display: grid;
           grid-template-columns: max-content 1fr;

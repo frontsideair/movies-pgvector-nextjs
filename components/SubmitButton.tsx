@@ -6,7 +6,7 @@ export function SubmitButton() {
   const { pending } = useFormStatus();
   return (
     <button type="submit" aria-busy={pending}>
-      <style>{`
+      <style href="submit-button" precedence="default">{`
         button[type="submit"][aria-busy="true"] {
           opacity: 0.5;
         }

@@ -8,7 +8,7 @@ type Props = {
 export function SearchResults({ movies }: Props) {
   return (
     <>
-      <style>{`
+      <style href="search-results" precedence="default">{`
         main p {
           padding: 1rem;
           text-align: center;

@@ -5,7 +5,7 @@ import { SubmitButton } from "./SubmitButton";
 export function SearchForm({ q, limit, distance }: Query) {
   return (
     <search>
-      <style>{`
+      <style href="search-form" precedence="default">{`
         header form {
           display: flex;
           align-items: flex-end;

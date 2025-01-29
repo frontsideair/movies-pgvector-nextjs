@@ -14,7 +14,7 @@ export default async function Page({ searchParams }: Props) {
 
   return (
     <>
-      <style>{`
+      <style href="body" precedence="default">{`
         body {
           max-width: 80ch;
           margin: 0 auto;

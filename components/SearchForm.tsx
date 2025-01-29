@@ -1,5 +1,6 @@
 import { distanceFunctions, type Query } from "@/lib/shared";
 import Form from "next/form";
+import { SubmitButton } from "./SubmitButton";
 
 export function SearchForm({ q, limit, distance }: Query) {
   return (
@@ -37,7 +38,7 @@ export function SearchForm({ q, limit, distance }: Query) {
             ))}
           </select>
         </label>
-        <button type="submit">Search</button>
+        <SubmitButton />
       </Form>
     </search>
   );

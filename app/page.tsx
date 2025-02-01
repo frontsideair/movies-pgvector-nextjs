@@ -15,6 +15,10 @@ export default async function Page({ searchParams }: Props) {
   return (
     <>
       <style href="body" precedence="default">{`
+        :root {
+          color-scheme: light dark;
+          --border-color: #ccc;
+        }
         body {
           max-width: 80ch;
           margin: 0 auto;

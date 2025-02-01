@@ -20,7 +20,7 @@ export function SearchResults({ movies }: Props) {
           gap: 1rem;
         }
         main li {
-          border: 1px solid black;
+          border: 1px solid var(--border-color);
           border-radius: 0.5rem;
           padding: 1rem;
         }
